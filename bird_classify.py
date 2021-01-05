@@ -33,7 +33,7 @@ import re
 import imp
 import logging
 import gstreamer
-from edgetpu.classification.engine import ClassificationEngine
+import pycoral
 from PIL import Image
 from playsound import playsound
 
@@ -103,8 +103,11 @@ def main():
     'alarm' if a defined label is detected."""
     args = user_selections()
     print("Loading %s with %s labels."%(args.model, args.labels))
-    engine = ClassificationEngine(args.model)
+    #engine = ClassificationEngine(args.model)
+    engine = edgetpu.make_interpreter(args.model)
+    engine.allocate_tensors()
     labels = load_labels(args.labels)
+
     storage_dir = args.storage
     rtspURL = args.rtspURL
 
@@ -119,7 +122,11 @@ def main():
         nonlocal last_time
         nonlocal last_results
         start_time = time.monotonic()
-        results = engine.classify_with_image(image, threshold=args.threshold, top_k=args.top_k)
+        #results = engine.classify_with_image(image, threshold=args.threshold, top_k=args.top_k)
+        common.set_input(interpreter, image)
+        interpreter.invoke()
+        results = classify.get_classes(interpreter, top_k=1)
+
         end_time = time.monotonic()
         results = [(labels[i], score) for i, score in results]
 
