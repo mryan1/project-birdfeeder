@@ -90,6 +90,8 @@ def user_selections():
                         help='Print inference results to terminal')
     parser.add_argument('--training', default=False, required=False,
                         help='Training mode for image collection')
+    parser.add_argument('--rtspURL', required=False,
+                        help='rtsp URL for external camera source')
     args = parser.parse_args()
     return args
 
@@ -104,6 +106,7 @@ def main():
     engine = ClassificationEngine(args.model)
     labels = load_labels(args.labels)
     storage_dir = args.storage
+    rtspURL = args.rtspURL
 
     #Initialize logging file
     logging.basicConfig(filename='%s/results.log'%storage_dir,
@@ -137,7 +140,10 @@ def main():
 
         last_results=results
         last_time = end_time
-    result = gstreamer.run_pipeline(user_callback)
+    if rtspURL:
+      result = gstreamer.run_pipeline(user_callback, rtspURL)
+    else:
+      result = gstreamer.run_pipeline(user_callback)
 
 if __name__ == '__main__':
     main()
