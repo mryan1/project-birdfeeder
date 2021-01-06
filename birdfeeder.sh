@@ -21,7 +21,6 @@ python3 bird_classify.py \
 	--model mobilenet_v2_1.0_224_quant_edgetpu.tflite \
 	--labels imagenet_labels.txt \
 	--storage data \
-	--sound sound_file.wav \
     --rtspURL rtsp://192.168.6.157:8554/test 
 
 	#--training True \

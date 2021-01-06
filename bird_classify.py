@@ -144,18 +144,16 @@ def main():
         else:
           #Custom model mode:
           #The labels can be modified to detect/deter user-selected items
-          if results[0][0] !='background' and results[0][1] > 0.5:
+          if results[0][0] !='patio, terrace' and results[0][1] > 0.5:
             save_data(image,results, storage_dir)
-            print(results)
+            print_results(start_time,last_time, end_time, results)
 
         last_results=results
         last_time = end_time
     if rtspURL:
-      print(f'Call with RTSP - {rtspURL}')
       result = gstreamer.run_pipeline(user_callback, rtspURL)
 
     else:
-      print('call without RTSP')
       result = gstreamer.run_pipeline(user_callback)
 
 if __name__ == '__main__':
