@@ -37,6 +37,7 @@ from pycoral.utils import edgetpu
 from pycoral.utils import dataset
 from pycoral.adapters import common
 from pycoral.adapters import classify
+from pycoral.utils.edgetpu import make_interpreter
 from PIL import Image
 from playsound import playsound
 
@@ -126,7 +127,12 @@ def main():
         nonlocal last_results
         start_time = time.monotonic()
         #results = engine.classify_with_image(image, threshold=args.threshold, top_k=args.top_k)
+        interpreter = make_interpreter(*args.model.split('@'))
+        interpreter.allocate_tensors()
+        size = common.input_size(interpreter)
+        image = image.resize(size, Image.ANTIALIAS)
         common.set_input(interpreter, image)
+
         interpreter.invoke()
         results = classify.get_classes(interpreter, top_k=1)
 
@@ -142,17 +148,21 @@ def main():
         else:
           #Custom model mode:
           #The labels can be modified to detect/deter user-selected items
-          if results[0][0] !='background':
-            save_data(image, storage_dir,results)
-          if 'fox squirrel, eastern fox squirrel, Sciurus niger' in results:
-            playsound(args.sound)
-            logging.info('Deterrent sounded')
+          if results[0][0] !='background' and results[0][1] > 0.5:
+            #save_data(image, storage_dir,results)
+            print(results)
+          #if 'fox squirrel, eastern fox squirrel, Sciurus niger' in results:
+          #  playsound(args.sound)
+          #  logging.info('Deterrent sounded')
 
         last_results=results
         last_time = end_time
     if rtspURL:
+      print(f'Call with RTSP - {rtspURL}')
       result = gstreamer.run_pipeline(user_callback, rtspURL)
+
     else:
+      print('call without RTSP')
       result = gstreamer.run_pipeline(user_callback)
 
 if __name__ == '__main__':
