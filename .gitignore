@@ -2,3 +2,4 @@ data/results.log
 imagenet_labels.txt
 mobilenet_v2_1.0_224_quant_edgetpu.tflite
 __pycache__/gstreamer.cpython-37.pyc
+/data

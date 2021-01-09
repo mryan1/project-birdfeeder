@@ -1,7 +1,19 @@
 # Coral Smart Birdfeeder
-A smart birdfeeder that uses the Coral Enterprise Board + Camera module,
-and identifies the birds that use the feeder. It also implements a deterrent
-for any visiting squirrels.
+A smart birdfeeder that uses the Coral Enterprise Board + Pi Zero W with camera as a RTSP video source in the feeder,
+and identifies the birds that use the feeder. 
+
+### to-do
+- daemonize python detection script
+- build build specific model
+- image cleanup process
+- video loss recovery
+- power down at night, up in the morning
+>- can be based off light sensor
+- focus lense closer to feeder
+- solar power for pi zero
+
+
+
 
 ## License
 Copyright 2019 Google LLC
