@@ -39,6 +39,12 @@ from pycoral.adapters import common
 from pycoral.adapters import classify
 from pycoral.utils.edgetpu import make_interpreter
 from PIL import Image
+from pushover import Client
+
+
+def send_alert(image, results):
+  print('Sending alert... \n')
+  client.send_message("Hello!", title="Hello", attachment=image)
 
 def save_data(image,results,path,ext='png'):
     """Saves camera frame and model inference results
@@ -95,6 +101,10 @@ def user_selections():
                         help='Training mode for image collection')
     parser.add_argument('--rtspURL', required=False,
                         help='rtsp URL for external camera source')
+    parser.add_argument('--pushoveruserkey', required=False,
+                        help='Pushover user key for notifications')
+    parser.add_argument('--pushoverapitoken', required=False,
+                        help='Pushover api token for notifications')
     args = parser.parse_args()
     return args
 
@@ -113,6 +123,10 @@ def main():
 
     storage_dir = args.storage
     rtspURL = args.rtspURL
+    #Initalize Pushover
+    if args.pushoverapitoken and args.pushoveruserkey:
+      client = Client(args.pushoveruserkey, api_token=args.pushoverapitoken)
+
 
     #Initialize logging file
     logging.basicConfig(filename='%s/results.log'%storage_dir,
@@ -121,11 +135,13 @@ def main():
 
     last_time = time.monotonic()
     last_saveimg = time.monotonic()
+    last_alert = time.monotonic()
     last_results = [('label', 0)]
     def user_callback(image,fullimg):
         nonlocal last_time
         nonlocal last_results
         nonlocal last_saveimg
+        nonlocal last_alert
         start_time = time.monotonic()
         interpreter = make_interpreter(*args.model.split('@'))
         interpreter.allocate_tensors()
@@ -144,9 +160,10 @@ def main():
         #save img every 2 seconds as not to cause contraints waiting for writes to disk
         if results[0][0] !='patio, terrace' and results[0][0] !='picket fence, paling' and  results[0][1] > 0.65:
           if (time.monotonic() - last_saveimg) > 2:
-            print(f'time difference- {time.monotonic() - last_saveimg}')
             save_data(fullimg,results, storage_dir)
             last_saveimg = time.monotonic()
+          if (time.monotonic() - last_alert) > 900 and args.pushoverapitoken and args.pushoveruserkey:
+            send_alert(image, results[0][0])
 
         last_results=results
         last_time = end_time
