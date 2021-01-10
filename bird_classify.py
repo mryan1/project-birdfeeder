@@ -42,7 +42,7 @@ from PIL import Image
 from pushover import Client
 
 
-def send_alert(image, results):
+def send_alert(client, image, results):
   print('Sending alert... \n')
   client.send_message(results, title="Bird Detected", attachment=image)
 
@@ -164,7 +164,7 @@ def main():
             save_data(fullimg,results, storage_dir)
             last_saveimg = time.monotonic()
           if (time.monotonic() - last_alert) > 900 and args.pushoverapitoken and args.pushoveruserkey:
-            send_alert(image, results[0][0])
+            send_alert(client, image, results[0][0])
 
         last_results=results
         last_time = end_time
