@@ -44,7 +44,7 @@ from pushover import Client
 
 def send_alert(image, results):
   print('Sending alert... \n')
-  client.send_message("Hello!", title="Hello", attachment=image)
+  client.send_message(results, title="Bird Detected", attachment=image)
 
 def save_data(image,results,path,ext='png'):
     """Saves camera frame and model inference results
@@ -116,22 +116,23 @@ def main():
     'alarm' if a defined label is detected."""
     args = user_selections()
     print("Loading %s with %s labels."%(args.model, args.labels))
-    #engine = ClassificationEngine(args.model)
     engine = edgetpu.make_interpreter(args.model)
     engine.allocate_tensors()
     labels = load_labels(args.labels)
 
     storage_dir = args.storage
     rtspURL = args.rtspURL
-    #Initalize Pushover
-    if args.pushoverapitoken and args.pushoveruserkey:
-      client = Client(args.pushoveruserkey, api_token=args.pushoverapitoken)
-
 
     #Initialize logging file
     logging.basicConfig(filename='%s/results.log'%storage_dir,
                         format='%(asctime)s-%(message)s',
                         level=logging.DEBUG)
+
+    #Initalize Pushover
+    print(args)
+    if args.pushoverapitoken is not None and args.pushoveruserkey is not None:
+      logging.info("Initalizing pushover")
+      client = Client(args.pushoveruserkey, api_token=args.pushoverapitoken)
 
     last_time = time.monotonic()
     last_saveimg = time.monotonic()
