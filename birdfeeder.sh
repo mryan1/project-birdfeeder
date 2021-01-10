@@ -21,7 +21,7 @@ python3 /home/mendel/project-birdfeeder/bird_classify.py \
 	--model /home/mendel/project-birdfeeder/mobilenet_v2_1.0_224_quant_edgetpu.tflite \
 	--labels /home/mendel/project-birdfeeder/imagenet_labels.txt \
 	--storage /home/mendel/project-birdfeeder/data \
-    --rtspURL rtsp://192.168.6.157:8554/test 
+    --rtspURL rtsp://192.168.6.157:8554/test \
 	--print True
 
 	#--training True \

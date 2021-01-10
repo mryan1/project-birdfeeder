@@ -61,6 +61,7 @@ def print_results(start_time, last_time, end_time, results):
     """Print results to terminal for debugging."""
     inference_rate = ((end_time - start_time) * 1000)
     fps = (1.0/(end_time - last_time))
+    logging.info('Results: %s' ,results)
     print('\nInference: %.2f ms, FPS: %.2f fps' % (inference_rate, fps))
     for label, score in results:
       print(' %s, score=%.2f' %(label, score))
