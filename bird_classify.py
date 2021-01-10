@@ -144,7 +144,7 @@ def main():
         else:
           #Custom model mode:
           #The labels can be modified to detect/deter user-selected items
-          if results[0][0] !='patio, terrace' and results[0][1] > 0.5:
+          if results[0][0] !='patio, terrace' and results[0][0] !='picket fence, paling' and  results[0][1] > 0.65:
             save_data(image,results, storage_dir)
             print_results(start_time,last_time, end_time, results)
 

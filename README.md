@@ -11,6 +11,8 @@ and identifies the birds that use the feeder.
 >- can be based off light sensor
 - focus lense closer to feeder
 - solar power for pi zero
+- better resolution snapshot
+>- infer at low res and have high res for snapshot
 
 
 
