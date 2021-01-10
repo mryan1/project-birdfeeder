@@ -20,7 +20,8 @@
 python3 bird_classify.py \
 	--model mobilenet_v2_1.0_224_quant_edgetpu.tflite \
 	--labels imagenet_labels.txt \
-	--storage sdcard_directory \
-	--sound sound_file.wav \
-	--training True \
-	--print True
+	--storage data \
+    --rtspURL rtsp://192.168.6.157:8554/test 
+
+	#--training True \
+	# --print True \

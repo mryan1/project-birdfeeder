@@ -59,28 +59,33 @@ def detectCoralDevBoard():
   return False
 
 def run_pipeline(user_function,
+                 rtsp=None,
                  src_size=(640,480),
-                 appsink_size=(320, 180), rtspURL=None):
-    PIPELINE = 'v4l2src device=/dev/video0 ! {src_caps} ! {leaky_q}  ! tee name=t'
-    if detectCoralDevBoard() and rtspURL == None:
+                 appsink_size=(320, 180)):
+    print(f'rtsp url is {rtsp}')    
+    #PIPELINE = 'v4l2src device=/dev/video0 ! {src_caps} ! {leaky_q}  ! tee name=t'
+    if detectCoralDevBoard() and rtsp == None:
         SRC_CAPS = 'video/x-raw,format=YUY2,width={width},height={height},framerate=30/1'
-        PIPELINE += """
+        PIPELINE = """
+            v4l2src device=/dev/video0 ! {src_caps} ! {leaky_q}  ! tee name=t
             t. ! {leaky_q} ! glupload ! glfilterbin filter=glcolorscale
                ! {dl_caps} ! videoconvert ! {sink_caps} ! {sink_element}
             t. ! {leaky_q} ! glupload ! glfilterbin filter=glcolorscale
                ! rsvgoverlay name=overlay ! waylandsink
         """
-    elif rtspURL:
+    elif rtsp != None:
         SRC_CAPS = 'video/x-raw,format=YUY2,width={width},height={height},framerate=30/1'
-        PIPELINE += """
+        PIPELINE = """
+            rtspsrc location={rtspurl} latency=300 ! decodebin ! {leaky_q}  ! tee name=t
             t. ! {leaky_q} ! glupload ! glfilterbin filter=glcolorscale
                ! {dl_caps} ! videoconvert ! {sink_caps} ! {sink_element}
             t. ! {leaky_q} ! glupload ! glfilterbin filter=glcolorscale
-               ! rsvgoverlay name=overlay ! waylandsink
+               ! rsvgoverlay name=overlay 
         """
     else:
         SRC_CAPS = 'video/x-raw,width={width},height={height},framerate=30/1'
-        PIPELINE += """
+        PIPELINE = """
+            v4l2src device=/dev/video0 ! {src_caps} ! {leaky_q}  ! tee name=t
             t. ! {leaky_q} ! videoconvert ! videoscale ! {sink_caps} ! {sink_element}
             t. ! {leaky_q} ! videoconvert
                ! rsvgoverlay name=overlay ! videoconvert ! ximagesink
@@ -94,7 +99,7 @@ def run_pipeline(user_function,
     src_caps = SRC_CAPS.format(width=src_size[0], height=src_size[1])
     dl_caps = DL_CAPS.format(width=appsink_size[0], height=appsink_size[1])
     sink_caps = SINK_CAPS.format(width=appsink_size[0], height=appsink_size[1])
-    pipeline = PIPELINE.format(leaky_q=LEAKY_Q,
+    pipeline = PIPELINE.format(rtspurl=rtsp, leaky_q=LEAKY_Q,
         src_caps=src_caps, dl_caps=dl_caps, sink_caps=sink_caps,
         sink_element=SINK_ELEMENT)
 
