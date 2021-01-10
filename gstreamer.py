@@ -38,16 +38,19 @@ def on_bus_message(bus, message, loop):
         loop.quit()
     return True
 
-def on_new_sample(sink, overlay, screen_size, appsink_size, user_function):
+def on_new_sample(sink, appsinkfull, screen_size, appsink_size, user_function):
     sample = sink.emit('pull-sample')
+    fullsample = appsinkfull.emit('pull-sample')
     buf = sample.get_buffer()
-    result, mapinfo = buf.map(Gst.MapFlags.READ)
-    if result:
+    fullbuf = fullsample.get_buffer()
+    result1, mapinfo = buf.map(Gst.MapFlags.READ)
+    result2, mapinfofull = fullbuf.map(Gst.MapFlags.READ)
+    if result1:
       img = Image.frombytes('RGB', (appsink_size[0], appsink_size[1]), mapinfo.data, 'raw')
-      svg_canvas = svgwrite.Drawing('', size=(screen_size[0], screen_size[1]))
-      user_function(img, svg_canvas)
-      overlay.set_property('data', svg_canvas.tostring())
+      fullimg = Image.frombytes('RGB', (screen_size[0], screen_size[1]), mapinfofull.data, 'raw')
+      user_function(img, fullimg)
     buf.unmap(mapinfo)
+    fullbuf.unmap(mapinfofull)
     return Gst.FlowReturn.OK
 
 def detectCoralDevBoard():
@@ -60,7 +63,7 @@ def detectCoralDevBoard():
 
 def run_pipeline(user_function,
                  rtsp=None,
-                 src_size=(640,480),
+                 src_size=(1280,720),
                  appsink_size=(320, 180)):
     print(f'rtsp url is {rtsp}')    
     #PIPELINE = 'v4l2src device=/dev/video0 ! {src_caps} ! {leaky_q}  ! tee name=t'
@@ -70,8 +73,8 @@ def run_pipeline(user_function,
             v4l2src device=/dev/video0 ! {src_caps} ! {leaky_q}  ! tee name=t
             t. ! {leaky_q} ! glupload ! glfilterbin filter=glcolorscale
                ! {dl_caps} ! videoconvert ! {sink_caps} ! {sink_element}
-            t. ! {leaky_q} ! glupload ! glfilterbin filter=glcolorscale
-               ! rsvgoverlay name=overlay ! waylandsink
+            t. ! queue max-size-buffers=1 leaky=downstream ! glupload ! glfilterbin filter=glcolorscale
+               ! video/x-raw,format=RGBA,width=1280,height=720 ! videoconvert ! video/x-raw,format=RGB,width=1280,height=720 ! appsink name=appsinkfull sync=false emit-signals=false max-buffers=1 drop=true
         """
     elif rtsp != None:
         SRC_CAPS = 'video/x-raw,format=YUY2,width={width},height={height},framerate=30/1'
@@ -79,8 +82,8 @@ def run_pipeline(user_function,
             rtspsrc location={rtspurl} latency=300 ! decodebin ! {leaky_q}  ! tee name=t
             t. ! {leaky_q} ! glupload ! glfilterbin filter=glcolorscale
                ! {dl_caps} ! videoconvert ! {sink_caps} ! {sink_element}
-            t. ! {leaky_q} ! glupload ! glfilterbin filter=glcolorscale
-               ! rsvgoverlay name=overlay 
+            t. ! queue max-size-buffers=1 leaky=downstream ! glupload ! glfilterbin filter=glcolorscale
+               ! video/x-raw,format=RGBA,width=1280,height=720 ! videoconvert ! video/x-raw,format=RGB,width=1280,height=720 ! appsink name=appsinkfull sync=false emit-signals=true max-buffers=1 drop=true
         """
     else:
         SRC_CAPS = 'video/x-raw,width={width},height={height},framerate=30/1'
@@ -106,10 +109,10 @@ def run_pipeline(user_function,
     print('Gstreamer pipeline: ', pipeline)
     pipeline = Gst.parse_launch(pipeline)
 
-    overlay = pipeline.get_by_name('overlay')
+    appsinkfull = pipeline.get_by_name('appsinkfull')
     appsink = pipeline.get_by_name('appsink')
     appsink.connect('new-sample', partial(on_new_sample,
-        overlay=overlay, screen_size = src_size,
+        appsinkfull=appsinkfull, screen_size = src_size,
         appsink_size=appsink_size, user_function=user_function))
     loop = GObject.MainLoop()
 

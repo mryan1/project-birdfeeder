@@ -119,7 +119,7 @@ def main():
 
     last_time = time.monotonic()
     last_results = [('label', 0)]
-    def user_callback(image,svg_canvas):
+    def user_callback(image,fullimg):
         nonlocal last_time
         nonlocal last_results
         start_time = time.monotonic()
@@ -145,7 +145,7 @@ def main():
           #Custom model mode:
           #The labels can be modified to detect/deter user-selected items
           if results[0][0] !='patio, terrace' and results[0][0] !='picket fence, paling' and  results[0][1] > 0.65:
-            save_data(image,results, storage_dir)
+            save_data(fullimg,results, storage_dir)
             print_results(start_time,last_time, end_time, results)
 
         last_results=results
