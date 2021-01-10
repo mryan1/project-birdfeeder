@@ -139,7 +139,7 @@ def main():
         end_time = time.monotonic()
         results = [(labels[i], score) for i, score in results]
         #print results 
-        if args.print:
+        if args.print and results[0][0] !='patio, terrace' and results[0][0] !='picket fence, paling' and  results[0][1] > 0.65:
           print_results(start_time,last_time, end_time, results)
         #save img every 2 seconds as not to cause contraints waiting for writes to disk
         if results[0][0] !='patio, terrace' and results[0][0] !='picket fence, paling' and  results[0][1] > 0.65:
