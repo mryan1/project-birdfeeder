@@ -57,6 +57,7 @@ def load_labels(path):
       return {int(num): text.strip() for num, text in lines}
 
 def print_results(start_time, last_time, end_time, results):
+    print(f'Start time: {start_time}, Last Time: {last_time}, End Time: {end_time}')
     """Print results to terminal for debugging."""
     inference_rate = ((end_time - start_time) * 1000)
     fps = (1.0/(end_time - last_time))
@@ -118,10 +119,12 @@ def main():
                         level=logging.DEBUG)
 
     last_time = time.monotonic()
+    last_saveimg = time.monotonic()
     last_results = [('label', 0)]
     def user_callback(image,fullimg):
         nonlocal last_time
         nonlocal last_results
+        nonlocal last_saveimg
         start_time = time.monotonic()
         interpreter = make_interpreter(*args.model.split('@'))
         interpreter.allocate_tensors()
@@ -134,19 +137,15 @@ def main():
 
         end_time = time.monotonic()
         results = [(labels[i], score) for i, score in results]
-
+        #print results 
         if args.print:
           print_results(start_time,last_time, end_time, results)
-
-        if args.training:
-          if do_training(results,last_results,args.top_k):
-            save_data(image,results, storage_dir)
-        else:
-          #Custom model mode:
-          #The labels can be modified to detect/deter user-selected items
-          if results[0][0] !='patio, terrace' and results[0][0] !='picket fence, paling' and  results[0][1] > 0.65:
+        #save img every 2 seconds as not to cause contraints waiting for writes to disk
+        if results[0][0] !='patio, terrace' and results[0][0] !='picket fence, paling' and  results[0][1] > 0.65:
+          if (time.monotonic() - last_saveimg) > 2:
+            print(f'time difference- {time.monotonic() - last_saveimg}')
             save_data(fullimg,results, storage_dir)
-            print_results(start_time,last_time, end_time, results)
+            last_saveimg = time.monotonic()
 
         last_results=results
         last_time = end_time
