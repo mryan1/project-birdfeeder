@@ -3,15 +3,15 @@ A smart birdfeeder that uses the Coral Enterprise Board + Pi Zero W with camera 
 and identifies the birds that use the feeder. 
 
 ### to-do
--[] daemonize python detection script
--[] build bird specific model
--[] image cleanup process
--[] video loss recovery
--[] power down at night, up in the morning
+- [] daemonize python detection script
+- [] build bird specific model
+- [] image cleanup process
+- [] video loss recovery
+- [] power down at night, up in the morning
     - can be based off light sensor
--[] focus lense closer to feeder
--[] solar power for pi zero
--[x] better resolution snapshot
+- [] focus lense closer to feeder
+- [] solar power for pi zero
+- [x] better resolution snapshot
     - inference at low res and have high res for snapshot
 
 
