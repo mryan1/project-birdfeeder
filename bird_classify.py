@@ -40,11 +40,14 @@ from pycoral.adapters import classify
 from pycoral.utils.edgetpu import make_interpreter
 from PIL import Image
 from pushover import Client
+import io
 
 
 def send_alert(client, image, results):
   print('Sending alert... \n')
-  client.send_message(results, title="Bird Detected", attachment=image)
+  b = io.BytesIO()
+  image.save(b, "JPEG")
+  client.send_message(results, title="Bird Detected", attachment=b)
 
 def save_data(image,results,path,ext='png'):
     """Saves camera frame and model inference results
@@ -63,7 +66,6 @@ def load_labels(path):
       return {int(num): text.strip() for num, text in lines}
 
 def print_results(start_time, last_time, end_time, results):
-    print(f'Start time: {start_time}, Last Time: {last_time}, End Time: {end_time}')
     """Print results to terminal for debugging."""
     inference_rate = ((end_time - start_time) * 1000)
     fps = (1.0/(end_time - last_time))
