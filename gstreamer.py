@@ -21,6 +21,7 @@ gi.require_version('Gst', '1.0')
 gi.require_version('GstBase', '1.0')
 from gi.repository import GLib, GObject, Gst, GstBase
 from PIL import Image
+import time
 
 GObject.threads_init()
 Gst.init(None)
@@ -35,7 +36,11 @@ def on_bus_message(bus, message, loop):
     elif t == Gst.MessageType.ERROR:
         err, debug = message.parse_error()
         sys.stderr.write('Error: %s: %s\n' % (err, debug))
-        loop.quit()
+        if err == 'gst-resource-error-quark':
+            print('Lost stream, waiting to try reconnecting')
+            time.sleep(15)
+        else:
+            loop.quit()
     return True
 
 def on_new_sample(sink, appsinkfull, screen_size, appsink_size, user_function):
@@ -125,6 +130,7 @@ def run_pipeline(user_function,
     pipeline.set_state(Gst.State.PLAYING)
     try:
         loop.run()
+        dir(loop)
     except:
         pass
 

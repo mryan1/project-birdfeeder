@@ -47,7 +47,7 @@ def send_alert(client, image, results):
   print('Sending alert... \n')
   b = io.BytesIO()
   image.save(b, "JPEG")
-  client.send_message(results, title="Bird Detected", attachment=b)
+  client.send_message(results, title="Bird Detected", attachment=b, sound="intermission")
 
 def save_data(image,results,path,ext='png'):
     """Saves camera frame and model inference results
@@ -131,7 +131,6 @@ def main():
                         level=logging.DEBUG)
 
     #Initalize Pushover
-    print(args)
     if args.pushoverapitoken is not None and args.pushoveruserkey is not None:
       logging.info("Initalizing pushover")
       client = Client(args.pushoveruserkey, api_token=args.pushoverapitoken)
@@ -161,12 +160,13 @@ def main():
         if args.print and results[0][0] !='patio, terrace' and results[0][0] !='picket fence, paling' and  results[0][1] > 0.65:
           print_results(start_time,last_time, end_time, results)
         #save img every 2 seconds as not to cause contraints waiting for writes to disk
-        if results[0][0] !='patio, terrace' and results[0][0] !='picket fence, paling' and  results[0][1] > 0.65:
+        if results[0][0] !='patio, terrace' and results[0][0] !='picket fence, paling' and  results[0][0] !='bannister, banister, balustrade, balusters, handrail' and results[0][1] > 0.70:
           if (time.monotonic() - last_saveimg) > 2:
             save_data(fullimg,results, storage_dir)
             last_saveimg = time.monotonic()
           if (time.monotonic() - last_alert) > 900 and args.pushoverapitoken and args.pushoveruserkey:
             send_alert(client, image, results[0][0])
+            last_alert = time.monotonic()
 
         last_results=results
         last_time = end_time
