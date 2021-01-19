@@ -159,8 +159,8 @@ def main():
         #print results 
         if args.print and results[0][0] !='patio, terrace' and results[0][0] !='picket fence, paling' and  results[0][1] > 0.65:
           print_results(start_time,last_time, end_time, results)
-        #save img every 2 seconds as not to cause contraints waiting for writes to disk
-        if results[0][0] !='patio, terrace' and results[0][0] !='picket fence, paling' and  results[0][0] !='bannister, banister, balustrade, balusters, handrail' and results[0][1] > 0.70:
+        #save img every 2 seconds as not to cause contraints waiting for writes to disk.  'lumbermill, sawmill'
+        if results[0][0] !='patio, terrace' and results[0][0] !='picket fence, paling' and  results[0][0] !='bannister, banister, balustrade, balusters, handrail' and  results[0][0] !='lumbermill, sawmill' and results[0][1] > 0.70:
           if (time.monotonic() - last_saveimg) > 2:
             save_data(fullimg,results, storage_dir)
             last_saveimg = time.monotonic()
