@@ -39,6 +39,7 @@ from pycoral.adapters import common
 from pycoral.adapters import classify
 from pycoral.utils.edgetpu import make_interpreter
 from PIL import Image
+import piexif
 from pushover import Client
 import io
 
@@ -50,12 +51,15 @@ def send_alert(client, image, results):
   image.save(b, "JPEG")
   client.send_message(results, title="Bird Detected", attachment=b, sound="intermission")
 
-def save_data(image,results,path,ext='png'):
+def save_data(image,results,path,ext='jpg'):
     """Saves camera frame and model inference results
     to user-defined storage directory."""
     tag = '%010d' % int(time.monotonic()*1000)
     name = '%s/img-%s.%s' %(path,tag,ext)
-    image.save(name)
+    #add in exif data
+    exif_dict = {'0th':dict}
+    exif_dict['0th'] = {piexif.ImageIFD.ImageDescription : results[0][0]}
+    image.save(name, "jpeg", exif=piexif.dump(exif_dict))
     print('Frame saved as: %s' %name)
     logging.info('Image: %s Results: %s', tag,results)
 

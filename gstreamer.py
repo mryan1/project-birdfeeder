@@ -36,11 +36,12 @@ def on_bus_message(bus, message, loop):
     elif t == Gst.MessageType.ERROR:
         err, debug = message.parse_error()
         sys.stderr.write('Error: %s: %s\n' % (err, debug))
-        if err == 'gst-resource-error-quark':
-            print('Lost stream, waiting to try reconnecting')
-            time.sleep(15)
-        else:
-            loop.quit()
+        #if err.message.split(":")[0] == 'Could not open resource for reading and writing.':
+        #    print('Lost stream, waiting to try reconnecting')
+        #    time.sleep(15)
+        #else:
+        #    print('in else')
+        #    loop.quit()
     return True
 
 def on_new_sample(sink, appsinkfull, screen_size, appsink_size, user_function):
@@ -130,7 +131,6 @@ def run_pipeline(user_function,
     pipeline.set_state(Gst.State.PLAYING)
     try:
         loop.run()
-        dir(loop)
     except:
         pass
 
