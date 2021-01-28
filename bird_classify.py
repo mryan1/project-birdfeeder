@@ -47,7 +47,7 @@ import io
 def send_alert(client, image, results):
   print('Sending alert... \n')
   b = io.BytesIO()
-  image.thumbnail(128,128)
+  #image.thumbnail(128,128)
   image.save(b, "JPEG")
   client.send_message(results, title="Bird Detected", attachment=b, sound="intermission")
 
